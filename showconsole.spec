@@ -21,19 +21,19 @@ This small package provides a daemon for for logging during boot time
 of System V boot.
 
 %package devel
-Summary:	Header files for showconsole library
+Summary:	Header files for libblogger library
 Group:		Development/Libraries
 
 %description devel
-This is the package containing the header files for showconsole library.
+This is the package containing the header files for libblogger library.
 
 %package static
-Summary:	Static showconsole library
+Summary:	Static libblogger library
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
-Static showconsole library.
+Static libblogger library.
 
 %prep
 %setup -q
