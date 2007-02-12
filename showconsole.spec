@@ -1,5 +1,5 @@
 Summary:	Small daemon for logging console output during boot
-Summary(pl):	Ma≥y demon do logowania wyj∂cia konsoli w czasie startu systemu
+Summary(pl.UTF-8):   Ma≈Çy demon do logowania wyj≈õcia konsoli w czasie startu systemu
 Name:		showconsole
 Version:	1.08
 Release:	0.1
@@ -21,31 +21,31 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 This small package provides a daemon for logging during boot time of
 System V boot.
 
-%description -l pl
-Ten ma≥y pakiet udosÍpnia demona do logowania w czasie startu systemu
+%description -l pl.UTF-8
+Ten ma≈Çy pakiet udosƒôpnia demona do logowania w czasie startu systemu
 w stylu SysV.
 
 %package devel
 Summary:	Header files for libblogger library
-Summary(pl):	Pliki nag≥Ûwkowe biblioteki libblogger
+Summary(pl.UTF-8):   Pliki nag≈Ç√≥wkowe biblioteki libblogger
 Group:		Development/Libraries
 
 %description devel
 This is the package containing the header file for libblogger library.
 
-%description devel -l pl
-Ten pakiet zawiera plik nag≥Ûwkowy biblioteki libblogger.
+%description devel -l pl.UTF-8
+Ten pakiet zawiera plik nag≈Ç√≥wkowy biblioteki libblogger.
 
 %package static
 Summary:	Static libblogger library
-Summary(pl):	Statyczna biblioteka libblogger
+Summary(pl.UTF-8):   Statyczna biblioteka libblogger
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 Static libblogger library.
 
-%description static -l pl
+%description static -l pl.UTF-8
 Statyczna biblioteka libblogger.
 
 %prep
