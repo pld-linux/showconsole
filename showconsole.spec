@@ -1,5 +1,5 @@
 Summary:	Small daemon for logging console output during boot
-Summary(pl.UTF-8):   Mały demon do logowania wyjścia konsoli w czasie startu systemu
+Summary(pl.UTF-8):	Mały demon do logowania wyjścia konsoli w czasie startu systemu
 Name:		showconsole
 Version:	1.08
 Release:	0.1
@@ -27,7 +27,7 @@ w stylu SysV.
 
 %package devel
 Summary:	Header files for libblogger library
-Summary(pl.UTF-8):   Pliki nagłówkowe biblioteki libblogger
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki libblogger
 Group:		Development/Libraries
 
 %description devel
@@ -38,7 +38,7 @@ Ten pakiet zawiera plik nagłówkowy biblioteki libblogger.
 
 %package static
 Summary:	Static libblogger library
-Summary(pl.UTF-8):   Statyczna biblioteka libblogger
+Summary(pl.UTF-8):	Statyczna biblioteka libblogger
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
