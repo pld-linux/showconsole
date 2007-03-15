@@ -2,17 +2,14 @@ Summary:	Small daemon for logging console output during boot
 Summary(pl.UTF-8):	Mały demon do logowania wyjścia konsoli w czasie startu systemu
 Name:		showconsole
 Version:	1.08
-Release:	0.1
+Release:	0.2
 License:	GPL v2
 Group:		Applications
-# This tarball is extracted from SuSe's sysvinit-2.86-#.src.rpm
-# You can find said src rpm via opensuse.org:
-# http://mirrors.kernel.org/opensuse/distribution/SL-OSS-*/inst-source/suse/src/
-Source0:	http://distfiles.gentoo.org/distfiles/%{name}-%{version}.tar.bz2
-# Source0-md5:	392ff4f9e03b66769fa813f1897160c5
+Source0:	ftp://ftp.suse.com/pub/projects/init/%{name}-%{version}.tar.gz
+# Source0-md5:	351daafbf394a1602e92c7c9afe13a6a
 Patch0:		%{name}-no-TIOCGDEV.patch
 Patch1:		%{name}-quiet.patch
-URL:		http://www.novell.com/linux/suse/
+URL:		ftp://ftp.suse.com/pub/projects/init
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_sbindir	/sbin
