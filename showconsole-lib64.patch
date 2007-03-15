@@ -1,0 +1,21 @@
+--- showconsole-1.08/Makefile	2007-03-15 17:50:03.546127516 +0200
++++ showconsole-1.08/Makefile	2007-03-15 17:51:26.653322722 +0200
+@@ -16,6 +16,7 @@
+ VERSION	 =	1.08
+ DATE	 =	$(shell date +'%d%b%y' | tr '[:lower:]' '[:upper:]')
+ COPTS    =
++lib     := lib
+ 
+ #
+ # Architecture
+@@ -51,8 +52,8 @@
+ 	SDOCDIR = $(DESTDIR)/usr/share/man/man8
+ 	SBINDIR = $(DESTDIR)/sbin
+ 	CONFDIR = $(DESTDIR)/etc
+-	 LSBDIR = $(DESTDIR)/usr/lib/lsb
+-	 LIBDIR = $(DESTDIR)/usr/lib
++	 LSBDIR = $(DESTDIR)/usr/$(lib)/lsb
++	 LIBDIR = $(DESTDIR)/usr/$(lib)
+ 	 INCDIR = $(DESTDIR)/usr/include
+ #
+ #
