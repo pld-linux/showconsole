@@ -59,9 +59,12 @@ Statyczna biblioteka libblogger.
 
 %install
 rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT/var/log
 %{__make} install \
 	lib=%{_lib} \
 	DESTDIR=$RPM_BUILD_ROOT
+
+touch $RPM_BUILD_ROOT/var/log/boot.msg
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -78,6 +81,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/isserial.8*
 %{_mandir}/man8/setconsole.8*
 %{_mandir}/man8/showconsole.8*
+%ghost /var/log/boot.msg
 
 %files devel
 %defattr(644,root,root,755)
