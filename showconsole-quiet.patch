@@ -1,5 +1,5 @@
---- blogd.c
-+++ blogd.c
+--- showconsole-1.08/blogd.c~	2007-10-30 18:59:38.000000000 +0200
++++ showconsole-1.08/blogd.c	2007-10-30 19:00:47.031838389 +0200
 @@ -183,6 +183,7 @@
  {
      int fd, flags;
@@ -24,10 +24,10 @@
  
      if (argc == 2)
  	tty = argv[1];
-@@ -282,6 +289,7 @@
- 	close(pts);
- 	close(ptm);
+@@ -362,6 +362,7 @@
  	close(fd);
+ 	if (fd2 > 0)
+ 	    close(fd2);
 +	if (!quiet)
  	fprintf(stdout, "\rBoot logging started on %s(%s) at %.24s\n", tty, name, stt);
  	fflush(stdout);
