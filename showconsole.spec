@@ -2,7 +2,7 @@ Summary:	Small daemon for logging console output during boot
 Summary(pl.UTF-8):	Mały demon do logowania wyjścia konsoli w czasie startu systemu
 Name:		showconsole
 Version:	1.08
-Release:	1.1
+Release:	2
 License:	GPL v2
 Group:		Base
 Source0:	ftp://ftp.suse.com/pub/projects/init/%{name}-%{version}.tar.gz
@@ -11,6 +11,7 @@ Patch0:		%{name}-suse.patch
 Patch1:		%{name}-quiet.patch
 Patch2:		%{name}-lib64.patch
 URL:		ftp://ftp.suse.com/pub/projects/init/
+BuildRequires:	linux-libc-headers >= 7:2.6.12.0-15
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_sbindir	/sbin
