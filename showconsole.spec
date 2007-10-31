@@ -76,6 +76,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_sbindir}/blogd
 %attr(755,root,root) %{_sbindir}/blogger
 %attr(755,root,root) %{_sbindir}/isserial
+%attr(755,root,root) %{_sbindir}/setconsole
 %attr(755,root,root) %{_sbindir}/showconsole
 %{_mandir}/man8/blogd.8*
 %{_mandir}/man8/blogger.8*
