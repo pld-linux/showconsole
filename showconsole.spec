@@ -88,7 +88,7 @@ fi
 %{_mandir}/man8/setconsole.8*
 %{_mandir}/man8/showconsole.8*
 %ghost /var/log/boot.msg
-%ghost %attr(640,root,root) /dev/blog
+%attr(640,root,root) %ghost /dev/blog
 
 %files devel
 %defattr(644,root,root,755)
