@@ -5,7 +5,7 @@ Version:	1.10
 Release:	2
 License:	GPL v2
 Group:		Base
-Source0:	ftp://ftp.suse.com/pub/projects/init/%{name}-%{version}.tar.bz2
+Source0:	%{name}-%{version}.tar.bz2
 # Source0-md5:	f0d9d76e1de0d6b4cff57f6b5f9ff523
 Patch0:		%{name}-quiet.patch
 Patch1:		%{name}-lib64.patch
