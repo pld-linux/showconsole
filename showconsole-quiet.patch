@@ -1,13 +1,13 @@
---- showconsole-1.08/blogd.c~	2007-10-30 18:59:38.000000000 +0200
-+++ showconsole-1.08/blogd.c	2007-10-30 19:00:47.031838389 +0200
-@@ -183,6 +183,7 @@
+--- showconsole-1.10/blogd.c~	2010-08-30 20:34:32.000000000 +0300
++++ showconsole-1.10/blogd.c	2010-08-30 20:35:03.281749868 +0300
+@@ -220,6 +220,7 @@
  {
-     int fd, flags;
+     int fd, fd2, flags;
      int ptm, pts, cntrtty = 1;
 +    int quiet = 0;
-     pid_t pid, ppid = getppid();
+     const pid_t ppid = getppid();
+     const pid_t pgrp = getpgid(ppid);
      char ptsname[NAME_MAX+1];
-     struct termios t;
 @@ -193,7 +194,14 @@
      myname = basename(*argv);
  

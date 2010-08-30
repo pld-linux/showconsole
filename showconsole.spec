@@ -1,14 +1,15 @@
 Summary:	Small daemon for logging console output during boot
 Summary(pl.UTF-8):	Mały demon do logowania wyjścia konsoli w czasie startu systemu
 Name:		showconsole
-Version:	1.09
+Version:	1.10
 Release:	1
 License:	GPL v2
 Group:		Base
-Source0:	ftp://ftp.suse.com/pub/projects/init/%{name}-%{version}.tar.gz
-# Source0-md5:	3e66d66ffa257661fb425db31932db41
+Source0:	ftp://ftp.suse.com/pub/projects/init/%{name}-%{version}.tar.bz2
+# Source0-md5:	f0d9d76e1de0d6b4cff57f6b5f9ff523
 Patch0:		%{name}-quiet.patch
 Patch1:		%{name}-lib64.patch
+Patch2:		%{name}-suse.patch
 URL:		ftp://ftp.suse.com/pub/projects/init/
 BuildRequires:	linux-libc-headers >= 7:2.6.12.0-15
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -50,6 +51,7 @@ Statyczna biblioteka libblogger.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p0
 
 %build
 %{__make} \

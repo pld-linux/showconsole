@@ -1,0 +1,254 @@
+--- Makefile
++++ Makefile	2010-05-28 14:15:39.662925024 +0000
+@@ -62,7 +62,7 @@ TODO	=	showconsole blogd blogger isseria
+ all: $(TODO)
+ 
+ libconsole.o:	libconsole.c libconsole.h
+-	$(CC) $(CFLAGS) $(CLOOP) -c $< -pthread
++	$(CC) $(CFLAGS) $(CLOOP) -D_REENTRANT -c $< -pthread
+ 
+ libblogger.o:	libblogger.c libblogger.h
+ 	$(CC) $(CFLAGS) $(CLOOP) -c $<
+@@ -74,7 +74,7 @@ showconsole:	showconsole.c libconsole.o
+ 	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^ -Wl,--as-needed -pthread
+ 
+ blogd:	blogd.c libconsole.o
+-	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^ -Wl,--as-needed -lutil -pthread
++	$(CC) $(CFLAGS) $(CLOOP) -D_REENTRANT -o $@ $^ -Wl,--as-needed -lutil -pthread
+ 
+ blogger:	blogger.c libblogger.a
+ 	$(CC) $(CFLAGS) $(CLOOP) -o $@ $^
+--- blogd.8
++++ blogd.8	2010-05-04 09:57:15.679656772 +0000
+@@ -58,6 +58,13 @@ that now it is able to write on
+ which means that the file system is
+ mounted read/write and the kernel
+ messages are written to that file.
++.TP
++.B SIGSYS
++says
++.B blogd
++that it should stop writing to disk but
++continue to repeat messages to the old
++devices of the system console.
+ \."
+ .SH BUGS
+ .B blogd
+--- blogd.c
++++ blogd.c	2010-05-28 14:31:23.748444849 +0000
+@@ -24,6 +24,7 @@
+ #include <errno.h>
+ #include <paths.h>
+ #include "libconsole.h"
++extern volatile sig_atomic_t nsigsys;
+ 
+ /*
+  * Internal logger
+@@ -102,11 +103,22 @@ static struct sigaction saved_sighup;
+ static struct sigaction saved_sigint;
+ static struct sigaction saved_sigquit;
+ static struct sigaction saved_sigterm;
++static struct sigaction saved_sigsys;
+ static volatile sig_atomic_t signaled = 0;
+ 
+ static void sighandle(int sig)
+ {
+-    signaled = sig;
++    if (nsigsys && (sig == SIGTERM))
++	return;
++    signaled = (volatile sig_atomic_t)sig;
++}
++
++/*
++ * Stop writing logs to disk, only repeat messages
++ */
++static void sigsys(int sig)
++{
++    nsigsys = (volatile sig_atomic_t)sig;
+ }
+ 
+ static void set_signal(int sig, struct sigaction *old, sighandler_t handler)
+@@ -116,7 +128,7 @@ static void set_signal(int sig, struct s
+ 	    break;
+     } while (errno == EINTR);
+ 
+-    if (old->sa_handler != handler) {
++    if (old && old->sa_handler != handler) {
+ 	struct sigaction new;
+ 	sigset_t sigset;
+ 
+@@ -143,7 +155,7 @@ static void reset_signal(int sig, struct
+ 	    break;
+     } while (errno == EINTR);
+ 
+-    if (old->sa_handler == cur.sa_handler) {
++    if (old && old->sa_handler == cur.sa_handler) {
+ 	do {
+ 	    if (sigaction(sig, old, NULL) == 0)
+ 		break;
+@@ -320,6 +332,7 @@ int main(int argc, char *argv[])
+     if (ioctl(pts, TIOCCONS, NULL) < 0)
+ 	error("can not set console device to %s: %s\n", ptsname, strerror(errno));
+ 
++    nsigsys = 0;
+     set_signal(SIGTTIN, &saved_sigttin, SIG_IGN);
+     set_signal(SIGTTOU, &saved_sigttou, SIG_IGN);
+     set_signal(SIGTSTP, &saved_sigtstp, SIG_IGN);
+@@ -327,9 +340,11 @@ int main(int argc, char *argv[])
+     set_signal(SIGINT,  &saved_sigint,  sighandle);
+     set_signal(SIGQUIT, &saved_sigquit, sighandle);
+     set_signal(SIGTERM, &saved_sigterm, sighandle);
++    set_signal(SIGSYS,  &saved_sigsys,  sigsys);
+     (void)siginterrupt(SIGINT,  0);
+     (void)siginterrupt(SIGQUIT, 0);
+     (void)siginterrupt(SIGTERM, 0);
++    (void)siginterrupt(SIGSYS,  0);
+ 
+     switch ((pid = fork())) {
+     case 0:
+@@ -364,11 +379,22 @@ int main(int argc, char *argv[])
+ 	fflush(stdout);
+ 	exit(0);
+     }
+-    pidfile();
+-    prepareIO(reconnect, pgrp, 0, 1, fd2);
++
++    prepareIO(reconnect, pidfile, pgrp, 0, 1, fd2);
+     while (!signaled)
+ 	safeIO();
+ 
++    (void)tcdrain(1);
++    (void)tcdrain(2);
++    if (fd2 > 0)
++	(void)tcdrain(fd2);
++
++    errno = 0;
++    if ((fd = open("/dev/console", O_RDWR|O_NOCTTY)) >= 0) {
++	(void)ioctl(fd, TIOCCONS, NULL);	/* Restore old console mapping */
++	close(fd);
++    }
++
+     if (!cntrtty)
+ 	kill(ppid, SIGSTOP);
+     closeIO();
+@@ -394,6 +420,7 @@ int main(int argc, char *argv[])
+     reset_signal(SIGINT,  &saved_sigint);
+     reset_signal(SIGQUIT, &saved_sigquit);
+     reset_signal(SIGTERM, &saved_sigterm);
++    reset_signal(SIGSYS,  &saved_sigsys);
+ 
+     return 0;
+ }
+--- libconsole.c
++++ libconsole.c	2010-05-28 13:57:01.458924791 +0000
+@@ -155,7 +155,7 @@ out:
+ /*
+  * Arg used: safe out
+  */
+-static void (*vc_reconnect)(int fd) = NULL;
++static void (*vc_reconnect)(int fd);
+ static inline void safeout (int fd, const char *ptr, size_t s)
+ {
+     int saveerr = errno;
+@@ -291,6 +291,7 @@ static int fdfifo  = -1;
+ /*
+  * Signal control for writing on log file
+  */
++volatile sig_atomic_t nsigsys = 0;
+ static volatile sig_atomic_t nsigio = -1;
+ static sigset_t save_oldset;
+ 
+@@ -382,7 +383,7 @@ xout:
+ static inline void writelog(void)
+ {
+     if (!flog)
+-	goto xout;;
++	goto xout;
+     clearerr(flog);
+     lock(&llock);
+     while (avail > 0) {
+@@ -715,6 +716,7 @@ static void *action(void *dummy)
+     sigaddset(&sigset, SIGINT);
+     sigaddset(&sigset, SIGQUIT);
+     sigaddset(&sigset, SIGTERM);
++    sigaddset(&sigset, SIGSYS);
+     (void)pthread_sigmask(SIG_BLOCK, &sigset, &save_oldset);
+ 
+     lock(&ljoin);
+@@ -739,11 +741,13 @@ static void *action(void *dummy)
+  * Prepare I/O
+  */
+ static const char *fifo_name = _PATH_BLOG_FIFO;
++static void (*vr_access)(void);
+ static pid_t pgroup = -1;
+ 
+-void prepareIO(void (*rfunc)(int), const pid_t pgrp, const int in, const int out, const int second)
++void prepareIO(void (*rfunc)(int), void (*pfunc)(void), const pid_t pgrp, const int in, const int out, const int second)
+ {
+     vc_reconnect = rfunc;
++    vr_access = pfunc;
+     pgroup  = pgrp;
+     fdread  = in;
+     fdwrite = out;
+@@ -871,6 +875,10 @@ void safeIO (void)
+ 		error("Can not open %s: %s\n", BOOT_LOGFILE, STRERR);
+ 	    goto skip;
+ 	}
++	if (vr_access) {
++	    (*vr_access)();
++	    vr_access = NULL;
++	}
+ 	if ((flog = fdopen (log, "a")) == NULL)
+ 		error("Can not open %s: %s\n", BOOT_LOGFILE, STRERR);
+ 
+@@ -915,6 +923,15 @@ skip:
+ 	pthread_setschedparam(pthread_self(), policy, &param);
+ 	pthread_setschedparam(lthread, policy, &param);
+     }
++
++    if (nsigsys) {  /* Stop writing logs to disk, only repeat messages */
++	if (flog)
++	    closeIO();
++	if (nsigio < 0) {
++	    nsigio = SIGIO;
++	    (void)signal(SIGIO, SIG_IGN);
++	}
++    }
+ }
+ 
+ /*
+@@ -926,11 +943,9 @@ void closeIO(void)
+     int n = 240;
+ 
+     /* Maybe we've catched a signal, therefore */
+-    if (flog) {
+-	fflush(flog);			/* Clear out stdio buffers   */
+-	fdatasync(fileno(flog));
+-    } else
++    if (!flog && !nsigsys)
+ 	warn("no message logging because /var file system is not accessible\n");
++
+     (void)tcdrain(fdwrite);		/* Hold in sync with console */
+     if (fdsec > 0)
+ 	(void)tcdrain(fdsec);		/* Hold in sync with second console */
+@@ -949,9 +964,8 @@ void closeIO(void)
+ 	timeout.tv_usec = 25*1000;
+ 
+     	more_input(&timeout, 1);
++	(void)tcdrain(fdread);
+ 
+-	if (!flog)
+-	    break;
+     } while (timeout.tv_sec || timeout.tv_usec);
+ 
+     if (running) {
+--- libconsole.h
++++ libconsole.h	2009-12-21 14:54:41.299449887 +0000
+@@ -2,6 +2,6 @@ extern void pushd(const char * path);
+ extern void popd(void);
+ extern char * fetchtty(const pid_t pid, const pid_t ppid, unsigned int *mjmi);
+ extern char * secondtty(char * compare);
+-extern void prepareIO(void (*rfunc)(int), const pid_t pgrp, const int in, const int out, const int second);
++extern void prepareIO(void (*rfunc)(int), void (*pfunc)(void), const pid_t pgrp, const int in, const int out, const int second);
+ extern void safeIO (void);
+ extern void closeIO(void);
