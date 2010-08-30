@@ -2,7 +2,7 @@ Summary:	Small daemon for logging console output during boot
 Summary(pl.UTF-8):	Mały demon do logowania wyjścia konsoli w czasie startu systemu
 Name:		showconsole
 Version:	1.10
-Release:	2
+Release:	3
 License:	GPL v2
 Group:		Base
 Source0:	%{name}-%{version}.tar.bz2
@@ -69,7 +69,7 @@ install -d $RPM_BUILD_ROOT{/dev,/var/log}
 	lib=%{_lib} \
 	DESTDIR=$RPM_BUILD_ROOT
 
-touch $RPM_BUILD_ROOT/var/log/boot.msg
+touch $RPM_BUILD_ROOT/var/log/boot.log
 touch $RPM_BUILD_ROOT/dev/blog
 
 %clean
@@ -93,7 +93,7 @@ fi
 %{_mandir}/man8/isserial.8*
 %{_mandir}/man8/setconsole.8*
 %{_mandir}/man8/showconsole.8*
-%ghost /var/log/boot.msg
+%ghost /var/log/boot.log
 %attr(640,root,root) %ghost /dev/blog
 
 %files devel
